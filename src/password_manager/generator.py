@@ -14,6 +14,9 @@ class IPasswordGenerator(Protocol):
         Args:
             length (int): длина пароля, не меньше `MIN_PASSWORD_LENGTH`
 
+        Returns:
+            str: случайный пароль
+
         Raises:
             ValueError: если длина пароля меньше `MIN_PASSWORD_LENGTH`
         """
@@ -29,6 +32,9 @@ class PasswordGenerator:
 
         Args:
             length (int): длина пароля, не меньше `MIN_PASSWORD_LENGTH`
+
+        Returns:
+            str: случайный пароль
 
         Raises:
             ValueError: если длина пароля меньше `MIN_PASSWORD_LENGTH`
