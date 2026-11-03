@@ -21,6 +21,11 @@ module-name = "password_manager"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = [
+    "-ra",
+    "--import-mode=importlib",
+]
 
 [tool.mypy]
 strict = true
