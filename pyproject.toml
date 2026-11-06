@@ -3,7 +3,9 @@ name = "hse-password-manager"
 version = "0.1.0"
 description = "Simple password manager"
 requires-python = ">=3.15"
-dependencies = []
+dependencies = [
+    "cryptography>=50.0.2",
+]
 
 [dependency-groups]
 dev = [
