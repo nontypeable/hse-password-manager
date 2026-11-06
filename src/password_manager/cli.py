@@ -76,7 +76,7 @@ def _menu(pm: PasswordManager) -> None:
                     print("Неизвестная команда.")
         except KeyError:
             print("Запись не найдена.")
-        except ValueError as exc:
+        except (ValueError, OSError) as exc:
             print(f"Ошибка: {exc}")
 
 
@@ -131,4 +131,10 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         print(f"Ошибка: {exc}", file=sys.stderr)
         return 1
+    except OSError as exc:
+        print(f"Ошибка доступа к файлу хранилища: {exc}", file=sys.stderr)
+        return 1
+    except KeyboardInterrupt:
+        print("\nПрервано.", file=sys.stderr)
+        return 130
     return 0
