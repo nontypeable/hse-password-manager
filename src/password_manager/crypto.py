@@ -59,6 +59,8 @@ class PasswordEncryptor:
 
         if len(salt) < SALT_SIZE:
             raise ValueError(f"Соль должна быть не короче {SALT_SIZE} байт")
+        if len(salt) > SALT_SIZE:
+            raise ValueError(f"Соль должны быть не длиннее {SALT_SIZE} байт")
 
         self._salt = salt
         self._key = derive_key(password, salt)
