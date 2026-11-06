@@ -20,7 +20,6 @@ class IPasswordGenerator(Protocol):
         Raises:
             ValueError: если длина пароля меньше `MIN_PASSWORD_LENGTH`
         """
-
         ...
 
 

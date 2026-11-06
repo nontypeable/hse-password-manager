@@ -5,8 +5,28 @@ from typing import Any, Protocol
 
 
 class IStorage(Protocol):
-    def load(self) -> dict[str, Any]: ...
-    def save(self, data: dict[str, Any]) -> None: ...
+    def load(self) -> dict[str, Any]:
+        """
+        Прочитать данные хранилища.
+
+        Returns:
+            dict: содержимое хранилища, пустой словарь, если оно ещё не создано.
+
+        Raises:
+            ValueError: если сохранённые данные повреждены.
+        """
+
+        ...
+
+    def save(self, data: dict[str, Any]) -> None:
+        """
+        Записать данные хранилища.
+
+        Args:
+            data (dict): данные, которые надо сохранить.
+        """
+
+        ...
 
 
 class JsonStorage:

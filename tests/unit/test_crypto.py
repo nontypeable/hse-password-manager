@@ -8,6 +8,8 @@ from password_manager.crypto import (
     NONCE_SIZE,
     SALT_SIZE,
     TAG_SIZE,
+    IPasswordDecryptor,
+    IPasswordEncryptor,
     PasswordDecryptor,
     PasswordEncryptor,
     derive_key,
@@ -19,12 +21,12 @@ MIN_CIPHER_LENGTH: Final[int] = SALT_SIZE + NONCE_SIZE + TAG_SIZE
 
 
 @pytest.fixture
-def password_encryptor() -> PasswordEncryptor:
+def password_encryptor() -> IPasswordEncryptor:
     return PasswordEncryptor(MASTER_PASSWORD, generate_salt())
 
 
 @pytest.fixture
-def password_decryptor() -> PasswordDecryptor:
+def password_decryptor() -> IPasswordDecryptor:
     return PasswordDecryptor(MASTER_PASSWORD)
 
 
@@ -81,7 +83,7 @@ class TestPasswordEncryptor:
 
     @pytest.mark.parametrize("password", ["p@ssw0rD", "🌚", "", "\n\t"])
     def test_output_length(
-        self, password_encryptor: PasswordEncryptor, password: str
+        self, password_encryptor: IPasswordEncryptor, password: str
     ) -> None:
         password_cipher = password_encryptor.encrypt(password)
 
@@ -89,14 +91,14 @@ class TestPasswordEncryptor:
 
     @pytest.mark.parametrize("password", ["p@ssw0rD", "🌚", "", "\n\t"])
     def test_output_unique(
-        self, password_encryptor: PasswordEncryptor, password: str
+        self, password_encryptor: IPasswordEncryptor, password: str
     ) -> None:
         password_cipher1 = password_encryptor.encrypt(password)
         password_cipher2 = password_encryptor.encrypt(password)
 
         assert password_cipher1 != password_cipher2
 
-    def test_nonce_is_unique(self, password_encryptor: PasswordEncryptor) -> None:
+    def test_nonce_is_unique(self, password_encryptor: IPasswordEncryptor) -> None:
         nonces = {
             password_encryptor.encrypt("p@ssw0rD")[SALT_SIZE : SALT_SIZE + NONCE_SIZE]
             for _ in range(100)
@@ -106,7 +108,7 @@ class TestPasswordEncryptor:
 
     @pytest.mark.parametrize("password", ["p@ssw0rD", "🌚", "\n\t"])
     def test_secret_not_in_output(
-        self, password_encryptor: PasswordEncryptor, password: str
+        self, password_encryptor: IPasswordEncryptor, password: str
     ) -> None:
         password_cipher = password_encryptor.encrypt(password)
 
@@ -136,8 +138,8 @@ class TestPasswordDecryptor:
     )
     def test_round_trip(
         self,
-        password_encryptor: PasswordEncryptor,
-        password_decryptor: PasswordDecryptor,
+        password_encryptor: IPasswordEncryptor,
+        password_decryptor: IPasswordDecryptor,
         password: str,
     ) -> None:
         password_cipher = password_encryptor.encrypt(password)
@@ -160,7 +162,7 @@ class TestPasswordDecryptor:
         "wrong_password", ["wrong", "", f"{MASTER_PASSWORD} ", MASTER_PASSWORD.upper()]
     )
     def test_wrong_master_password_raises(
-        self, password_encryptor: PasswordEncryptor, wrong_password: str
+        self, password_encryptor: IPasswordEncryptor, wrong_password: str
     ) -> None:
         password_cipher = password_encryptor.encrypt("p@ssw0rD")
 
@@ -174,8 +176,8 @@ class TestPasswordDecryptor:
     )
     def test_tampered_cipher_raises(
         self,
-        password_encryptor: PasswordEncryptor,
-        password_decryptor: PasswordDecryptor,
+        password_encryptor: IPasswordEncryptor,
+        password_decryptor: IPasswordDecryptor,
         position: int,
     ) -> None:
         password_cipher = bytearray(password_encryptor.encrypt("p@ssw0rD"))
@@ -188,15 +190,15 @@ class TestPasswordDecryptor:
         "length", [0, 1, SALT_SIZE, SALT_SIZE + NONCE_SIZE, MIN_CIPHER_LENGTH - 1]
     )
     def test_too_short_cipher_raises(
-        self, password_decryptor: PasswordDecryptor, length: int
+        self, password_decryptor: IPasswordDecryptor, length: int
     ) -> None:
         with pytest.raises(ValueError):
             password_decryptor.decrypt(b"x" * length)
 
     def test_minimum_length_cipher_is_valid(
         self,
-        password_encryptor: PasswordEncryptor,
-        password_decryptor: PasswordDecryptor,
+        password_encryptor: IPasswordEncryptor,
+        password_decryptor: IPasswordDecryptor,
     ) -> None:
         password_cipher = password_encryptor.encrypt("")
 
@@ -205,8 +207,8 @@ class TestPasswordDecryptor:
 
     def test_truncated_cipher_raises(
         self,
-        password_encryptor: PasswordEncryptor,
-        password_decryptor: PasswordDecryptor,
+        password_encryptor: IPasswordEncryptor,
+        password_decryptor: IPasswordDecryptor,
     ) -> None:
         password_cipher = password_encryptor.encrypt("p@ssw0rD")
 
@@ -215,22 +217,22 @@ class TestPasswordDecryptor:
 
     def test_cipher_with_extra_bytes_raises(
         self,
-        password_encryptor: PasswordEncryptor,
-        password_decryptor: PasswordDecryptor,
+        password_encryptor: IPasswordEncryptor,
+        password_decryptor: IPasswordDecryptor,
     ) -> None:
         password_cipher = password_encryptor.encrypt("p@ssw0rD")
 
         with pytest.raises(ValueError):
             password_decryptor.decrypt(password_cipher + b"\x00")
 
-    def test_random_bytes_raise(self, password_decryptor: PasswordDecryptor) -> None:
+    def test_random_bytes_raise(self, password_decryptor: IPasswordDecryptor) -> None:
         with pytest.raises(ValueError):
             password_decryptor.decrypt(os.urandom(100))
 
     def test_one_decryptor_decrypts_many_ciphers(
         self,
-        password_encryptor: PasswordEncryptor,
-        password_decryptor: PasswordDecryptor,
+        password_encryptor: IPasswordEncryptor,
+        password_decryptor: IPasswordDecryptor,
     ) -> None:
         passwords = ["p@ssw0rD", "🌚", "", "\n\t"]
         password_ciphers = [password_encryptor.encrypt(p) for p in passwords]
@@ -238,7 +240,7 @@ class TestPasswordDecryptor:
         assert [password_decryptor.decrypt(c) for c in password_ciphers] == passwords
 
     def test_decrypts_ciphers_with_different_salts(
-        self, password_decryptor: PasswordDecryptor
+        self, password_decryptor: IPasswordDecryptor
     ) -> None:
         password_cipher1 = PasswordEncryptor(MASTER_PASSWORD, b"a" * SALT_SIZE).encrypt(
             "first"

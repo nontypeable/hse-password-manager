@@ -1,5 +1,5 @@
 import os
-from typing import Final
+from typing import Final, Protocol
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives import hashes
@@ -46,6 +46,21 @@ def derive_key(password: str, salt: bytes) -> bytes:
     return kdf.derive(password.encode("utf-8"))
 
 
+class IPasswordEncryptor(Protocol):
+    def encrypt(self, plaintext: str) -> bytes:
+        """
+        Зашифровать пароль.
+
+        Args:
+            plaintext (str): пароль, который надо зашифровать.
+
+        Returns:
+            bytes: salt + nonce + шифротекст.
+        """
+
+        ...
+
+
 class PasswordEncryptor:
     def __init__(self, password: str, salt: bytes) -> None:
         """
@@ -90,6 +105,24 @@ class PasswordEncryptor:
         """
 
         return os.urandom(NONCE_SIZE)
+
+
+class IPasswordDecryptor(Protocol):
+    def decrypt(self, password_cipher: bytes) -> str:
+        """
+        Расшифровать пароль.
+
+        Args:
+            password_cipher (bytes): salt + nonce + шифротекст.
+
+        Returns:
+            str: расшифрованный пароль.
+
+        Raises:
+            ValueError: если мастер-пароль неверный или данные повреждены.
+        """
+
+        ...
 
 
 class PasswordDecryptor:
