@@ -4,8 +4,8 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Final
 
-from crypto import SALT_SIZE, PasswordDecryptor, PasswordEncryptor, generate_salt
-from storage import JsonStorage
+from .crypto import SALT_SIZE, PasswordDecryptor, PasswordEncryptor, generate_salt
+from .storage import JsonStorage
 
 DEFAULT_PATH: Final[Path] = Path("vault.json")
 CHECK_PHRASE: Final[str] = "password-manager-check-phrase"

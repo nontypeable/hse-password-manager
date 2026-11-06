@@ -2,8 +2,8 @@ import argparse
 import getpass
 import sys
 
-from generator import MIN_PASSWORD_LENGTH, PasswordGenerator
-from manager import DEFAULT_PATH, PasswordManager
+from .generator import MIN_PASSWORD_LENGTH, PasswordGenerator
+from .manager import DEFAULT_PATH, PasswordManager
 
 
 def _ask_new_master() -> str:
