@@ -35,7 +35,7 @@ class JsonStorage:
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
             if not isinstance(data, dict):
-                raise TypeError(f"Файл хранилища повреждён: {self.path}")
+                raise ValueError(f"Файл хранилища повреждён: {self.path}")  # noqa: TRY004
             return data
         except json.JSONDecodeError as exc:
             raise ValueError(f"Файл хранилища повреждён: {self.path}") from exc
