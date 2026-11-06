@@ -7,7 +7,7 @@ MIN_PASSWORD_LENGTH: Final[int] = 8
 
 class IPasswordGenerator(Protocol):
     @staticmethod
-    def generate_password(length: int) -> str:
+    def generate_password(length: int = MIN_PASSWORD_LENGTH) -> str:
         """
         Сгенерировать случайный пароль.
 
@@ -25,7 +25,7 @@ class IPasswordGenerator(Protocol):
 
 class PasswordGenerator:
     @staticmethod
-    def generate_password(length: int) -> str:
+    def generate_password(length: int = MIN_PASSWORD_LENGTH) -> str:
         """
         Сгенерировать случайный пароль.
 
